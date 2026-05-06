@@ -1,30 +1,24 @@
-APP_NAME := rumah-medisata
-IMAGE_NAME := rumah-medisata
-TAG := latest
-PORT := 3000
-
 .PHONY: build run stop restart logs clean ps shell
 
 build:
-	docker build -t $(IMAGE_NAME):$(TAG) .
+	docker build -t rumah-medisata:latest /home/elzafadli/container-data/batam
 
-run:
-	docker run -d --name $(APP_NAME) -p $(PORT):3000 $(IMAGE_NAME):$(TAG)
+run: stop
+	docker run -d -it -p 10.183.62.97:8003:3000 --name rumah-medisata --restart=always rumah-medisata:latest
 
 stop:
-	-docker stop $(APP_NAME)
-	-docker rm $(APP_NAME)
+	-docker rm -f rumah-medisata
 
-restart: stop run
+restart: build run
 
 logs:
-	docker logs -f $(APP_NAME)
+	docker logs -f rumah-medisata
 
 ps:
-	docker ps --filter name=$(APP_NAME)
+	docker ps --filter name=rumah-medisata
 
 shell:
-	docker exec -it $(APP_NAME) sh
+	docker exec -it rumah-medisata sh
 
 clean: stop
-	-docker rmi $(IMAGE_NAME):$(TAG)
+	-docker rmi rumah-medisata:latest
