@@ -1,339 +1,509 @@
-const cities = [
-  "Penang",
-  "Melaka",
-  "Kuala Lumpur",
-  "Johor Bahru",
-  "Kuching",
-  "Singapura",
+import Image from "next/image";
+
+type IconName =
+  | "analytics"
+  | "calendar_month"
+  | "keyboard_arrow_down"
+  | "concierge"
+  | "mail"
+  | "payments"
+  | "receipt_long"
+  | "route"
+  | "person_search"
+  | "share"
+  | "magic_button"
+  | "support_agent"
+  | "travel_explore";
+
+const destinations = ["Melaka", "Johor Bahru", "Penang", "Kuala Lumpur"];
+
+const painPoints = [
+  {
+    icon: "person_search" as const,
+    title: "Bingung pilih dokter",
+    text: "Ratusan spesialis tersedia, namun mana yang paling tepat untuk kondisi spesifik Anda?",
+  },
+  {
+    icon: "payments" as const,
+    title: "Tidak tahu estimasi biaya",
+    text: "Biaya tersembunyi seringkali mengganggu perencanaan finansial keluarga Anda.",
+  },
+  {
+    icon: "route" as const,
+    title: "Takut proses rumit",
+    text: "Dari paspor, hotel, hingga bahasa, birokrasi medis tidak seharusnya menjadi beban Anda.",
+  },
 ];
 
-const pressLogos = [
-  "Akurat.co",
-  "Berita Satu",
-  "Bisnis",
-  "Bisnis Indonesia",
-  "Brilio",
-  "JPNN",
-  "Liputan 6",
-  "Sindo News",
-  "Suara",
-  "Tribun News",
+const solutions = [
+  {
+    icon: "magic_button" as const,
+    title: "Kurasi Dokter Terbaik",
+    text: "Kami mencocokkan riwayat medis Anda dengan profil dokter paling berprestasi di Malaysia.",
+  },
+  {
+    icon: "analytics" as const,
+    title: "Transparansi Finansial",
+    text: "Dapatkan rincian estimasi biaya pengobatan sebelum Anda meninggalkan rumah.",
+  },
+  {
+    icon: "concierge" as const,
+    title: "Concierge 24/7",
+    text: "Asisten pribadi yang mendampingi setiap langkah Anda, memastikan kenyamanan total.",
+  },
 ];
 
 const services = [
-  "Memberikan rekomendasi dokter",
-  "Memberikan perkiraan biaya berobat",
-  "Mengecek jadwal dokter",
-  "Membuat appointment",
-  "Mengatur jemputan bandara",
-  "Booking hotel",
+  {
+    icon: "calendar_month" as const,
+    title: "Booking Dokter",
+    text: "Janji temu prioritas dengan spesialis terpilih tanpa antrean panjang.",
+  },
+  {
+    icon: "receipt_long" as const,
+    title: "Estimasi Biaya",
+    text: "Analisis biaya yang akurat membantu Anda merencanakan segalanya dengan matang.",
+  },
+  {
+    icon: "travel_explore" as const,
+    title: "Transport & Hotel",
+    text: "Pemesanan akomodasi dan transportasi privat yang ramah pasien.",
+  },
+  {
+    icon: "support_agent" as const,
+    title: "Pendampingan",
+    text: "Staf lokal kami akan mendampingi Anda langsung di rumah sakit di Malaysia.",
+  },
 ];
 
-const testimonials = [
+const hospitals = [
   {
-    name: "Kik*******auw",
-    city: "Luwu Timur",
-    date: "16 April 2026",
-    quote: "Makasi pelayanan dr medisata sangat baik dan rajin balas wa aku",
+    name: "Mahkota Medical Centre",
+    location: "Melaka, Malaysia",
   },
   {
-    name: "Mei*******gna",
-    city: "Medan",
-    date: "4 Maret 2026",
-    quote:
-      "Saya sangat puas sekali dengan bantuan dan pelayanan dari dr. Citra dari tim Medisata. Panduan yang diberikan sangat jelas sehingga proses pengobatan berjalan lancar.",
-  },
-  {
-    name: "Efi*******Shu",
-    city: "Medan",
-    date: "27 Februari 2026",
-    quote:
-      "Dr. Hani di Medisata sangat membantu di dalam proses appointment saya dengan dokter-dokter di Penang selama proses pengobatan kanker payudara saya.",
+    name: "Regency Specialist Hospital",
+    location: "Johor Bahru, Malaysia",
   },
 ];
+
+const whatsappUrl = "https://wa.me/";
+
+function Icon({
+  name,
+  className = "",
+}: {
+  name: IconName;
+  className?: string;
+}) {
+  return (
+    <span
+      className={`material-symbols-outlined ${className}`}
+      aria-hidden="true"
+    >
+      {name}
+    </span>
+  );
+}
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#f6fbff] text-slate-950">
-      <header className="sticky top-0 z-30 border-b border-sky-100 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-8">
-          <a href="#" className="flex items-center gap-3" aria-label="MediSata">
-            <span className="grid size-10 place-items-center rounded-md bg-[#1b9bd7] text-xl font-bold text-white">
-              M
-            </span>
-            <span className="text-2xl font-bold tracking-tight text-[#1b9bd7]">
-              MediSata
-            </span>
+    <main className="min-h-screen bg-[#f9f9fb] font-[Inter,Arial,sans-serif] text-[#1a1c1d] antialiased">
+      <header className="fixed top-0 z-50 w-full border-b border-gray-100/50 bg-white/80 shadow-[0_4px_30px_rgba(0,0,0,0.03)] backdrop-blur-2xl">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
+          <a
+            href="#"
+            aria-label="Concierge Prime"
+            className="text-xl font-semibold tracking-tight text-black"
+          >
+            Concierge Prime
           </a>
 
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-700 md:flex">
-            <a href="#" className="text-[#0b7eb6]">
-              Home
+          <nav className="hidden items-center gap-10 text-base font-medium md:flex">
+            <a
+              className="border-b-2 border-black pb-1 text-black"
+              href="#layanan"
+            >
+              Layanan
             </a>
-            <a href="#destinasi">Pilihan RS</a>
-            <a href="#checkup">Paket Check Up</a>
-            <a href="#layanan">Tentang Kami</a>
+            <a
+              className="text-gray-500 transition hover:text-black"
+              href="#rumah-sakit"
+            >
+              Rumah Sakit
+            </a>
+            <a
+              className="text-gray-500 transition hover:text-black"
+              href="#testimoni"
+            >
+              Testimoni
+            </a>
+            <a
+              className="text-gray-500 transition hover:text-black"
+              href="#tentang"
+            >
+              Tentang Kami
+            </a>
           </nav>
 
           <a
-            href="https://wa.me/"
-            className="rounded-md bg-[#25d366] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#1fb85a]"
+            href={whatsappUrl}
+            className="inline-flex min-h-10 items-center justify-center rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition active:scale-95 md:px-6"
           >
-            Butuh Bantuan?
+            Konsultasi Gratis
           </a>
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[#e8f6fc] lg:block" />
-        <div className="mx-auto grid min-h-[620px] max-w-7xl items-center gap-10 px-5 py-16 md:px-8 lg:grid-cols-[1.02fr_0.98fr]">
-          <div className="relative z-10">
-            <p className="mb-4 inline-flex rounded-md bg-sky-50 px-3 py-1 text-sm font-bold text-[#0b7eb6]">
-              Perwakilan RS Malaysia dan Singapura di Indonesia
-            </p>
-            <h1 className="max-w-3xl text-4xl font-extrabold leading-tight tracking-normal text-slate-950 md:text-6xl">
-              Dapatkan Layanan Medis Kelas Dunia dengan Biaya Terjangkau
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-              Konsultasi tujuan berobat, pilihan dokter, jadwal, estimasi biaya,
-              appointment, jemputan bandara, sampai booking hotel.
-            </p>
-
-            <div
-              id="destinasi"
-              className="mt-8 max-w-3xl rounded-lg border border-sky-100 bg-white p-5 shadow-xl shadow-sky-900/5"
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-normal text-slate-500">
-                    Pilih Destinasi Berobat
-                  </p>
-                  <h2 className="mt-1 text-2xl font-bold text-slate-950">
-                    Pilih kota tujuan
-                  </h2>
-                </div>
-                <a
-                  href="https://wa.me/"
-                  className="rounded-md border border-[#1b9bd7] px-4 py-2.5 text-center text-sm font-bold text-[#0b7eb6] transition hover:bg-sky-50"
-                >
-                  Chat rekomendasi
-                </a>
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {cities.map((city) => (
-                  <a
-                    key={city}
-                    href="#"
-                    className="group flex min-h-14 items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3 font-bold text-slate-800 transition hover:border-[#1b9bd7] hover:bg-white"
-                  >
-                    <span>{city}</span>
-                    <span className="text-[#1b9bd7] transition group-hover:translate-x-1">
-                      -&gt;
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 min-h-[440px]">
-            <div className="absolute left-0 top-8 h-72 w-72 rounded-full bg-[#f5d36b]/50 blur-3xl" />
-            <div className="absolute bottom-4 right-0 h-72 w-72 rounded-full bg-[#8fd1ea]/70 blur-3xl" />
-            <div className="relative ml-auto grid max-w-lg gap-4">
-              <div className="rounded-lg bg-[#0b7eb6] p-6 text-white shadow-2xl shadow-sky-900/20">
-                <div className="h-56 rounded-md bg-[linear-gradient(135deg,#e8f6fc_0%,#ffffff_48%,#bce6f5_100%)] p-5">
-                  <div className="grid h-full grid-cols-[1fr_0.75fr] gap-4">
-                    <div className="rounded-md bg-white/85 p-4 shadow-sm">
-                      <div className="mb-4 h-4 w-24 rounded bg-[#1b9bd7]" />
-                      <div className="space-y-2">
-                        <div className="h-3 rounded bg-slate-200" />
-                        <div className="h-3 w-4/5 rounded bg-slate-200" />
-                        <div className="h-3 w-3/5 rounded bg-slate-200" />
-                      </div>
-                      <div className="mt-8 grid grid-cols-3 gap-2">
-                        <div className="h-12 rounded bg-[#e7f7ef]" />
-                        <div className="h-12 rounded bg-[#fff5d6]" />
-                        <div className="h-12 rounded bg-[#e8f6fc]" />
-                      </div>
-                    </div>
-                    <div className="flex flex-col justify-end rounded-md bg-[#f7c94b] p-4">
-                      <div className="h-16 rounded-t-full bg-white/85" />
-                      <div className="h-24 rounded-b-md bg-white/85" />
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-5 grid grid-cols-3 gap-3 text-center text-sm">
-                  <div>
-                    <p className="text-2xl font-extrabold">100%</p>
-                    <p className="text-sky-100">Bebas biaya</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold">6</p>
-                    <p className="text-sky-100">Destinasi</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold">24/7</p>
-                    <p className="text-sky-100">Bantuan WA</p>
-                  </div>
-                </div>
-              </div>
-              <div className="rounded-lg border border-sky-100 bg-white p-5 shadow-xl shadow-sky-900/5">
-                <p className="text-sm font-bold text-slate-500">
-                  Layanan kami 100% bebas biaya
-                </p>
-                <p className="mt-2 text-lg font-bold text-slate-950">
-                  Tim dokter membantu memilih rumah sakit dan dokter yang
-                  sesuai keluhan Anda.
-                </p>
-              </div>
-            </div>
-          </div>
+      <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-black pt-20">
+        <div className="absolute inset-0 z-0">
+          <Image
+            alt="Premium Hospital Environment"
+            className="object-cover opacity-60"
+            fill
+            priority
+            sizes="100vw"
+            src="/assets/hero-hospital.jpg"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
         </div>
-      </section>
 
-      <section className="border-y border-sky-100 bg-sky-50/70 py-8">
-        <div className="mx-auto max-w-7xl px-5 md:px-8">
-          <p className="text-center text-sm font-bold text-slate-500">
-            Medisata telah diliput di:
+        <div className="relative z-10 mx-auto max-w-5xl px-5 text-center md:px-8">
+          <span className="mb-8 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-md">
+            Eksklusif Ke Malaysia
+          </span>
+          <h1 className="mb-8 text-5xl font-bold leading-[1.05] tracking-normal text-white md:text-7xl lg:text-8xl">
+            Berobat ke Malaysia <br className="hidden md:block" />
+            Tanpa Ribet
+          </h1>
+          <p className="mx-auto mb-12 max-w-2xl text-xl leading-relaxed text-gray-300 md:text-2xl">
+            Dari konsultasi hingga kepulangan, kami urus semuanya. Fokuslah pada
+            kesembuhan Anda, biarkan kami menangani logistiknya.
           </p>
-          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-            {pressLogos.map((logo) => (
-              <div
-                key={logo}
-                className="grid min-h-16 place-items-center rounded-md border border-sky-100 bg-white px-3 text-center text-sm font-bold text-slate-500 shadow-sm"
-              >
-                {logo}
-              </div>
-            ))}
+
+          <div className="mb-10">
+            <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-white/60">
+              Pilih Destinasi:
+            </p>
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+              {destinations.map((destination) => (
+                <a
+                  key={destination}
+                  href={whatsappUrl}
+                  className="rounded-full border border-white/20 bg-white/10 px-6 py-2 font-medium text-white backdrop-blur-md transition hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/50"
+                >
+                  {destination}
+                </a>
+              ))}
+            </div>
           </div>
+
+          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
+            <a
+              href={whatsappUrl}
+              className="inline-flex min-h-[68px] items-center justify-center rounded-full bg-white px-10 py-5 text-lg font-bold text-black shadow-2xl transition hover:bg-gray-200 active:scale-95"
+            >
+              Konsultasi Gratis
+            </a>
+            <a
+              href={whatsappUrl}
+              className="inline-flex min-h-[68px] items-center justify-center rounded-full border border-white/30 bg-white/10 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition hover:bg-white/20"
+            >
+              Cek Estimasi Biaya
+            </a>
+          </div>
+        </div>
+
+        <div className="absolute bottom-1 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-white/40 md:flex">
+          <span className="text-[10px] uppercase tracking-widest">
+            Scroll untuk mengeksplor
+          </span>
+          <Icon name="keyboard_arrow_down" className="animate-bounce" />
         </div>
       </section>
 
-      <section id="layanan" className="bg-white py-20">
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 md:px-8 lg:grid-cols-[0.85fr_1.15fr]">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-normal text-[#0b7eb6]">
-              Layanan Medisata
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold tracking-normal text-slate-950 md:text-5xl">
-              Perwakilan Rumah Sakit Malaysia dan Singapura di Indonesia
+      <section id="tentang" className="bg-[#f9f9fb] py-24 md:py-[120px]">
+        <div className="mx-auto mb-20 max-w-7xl px-5 text-center md:mb-24 md:px-8">
+          <h2 className="mb-4 text-3xl font-bold leading-tight text-black md:text-[32px]">
+            Mengapa Mengurus Sendiri Begitu Menantang?
+          </h2>
+          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-[#5f5e60] md:text-[19px]">
+            Kami memahami keraguan yang sering muncul saat mencari pengobatan di
+            luar negeri.
+          </p>
+        </div>
+
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 md:grid-cols-3 md:gap-12 md:px-8">
+          {painPoints.map((item) => (
+            <article
+              key={item.title}
+              className="rounded-[2rem] border border-[#e2e2e4] bg-white p-8 transition hover:-translate-y-1 md:p-10"
+            >
+              <Icon
+                name={item.icon}
+                className="mb-8 block !text-4xl text-black"
+              />
+              <h3 className="mb-4 text-2xl font-semibold leading-snug text-black">
+                {item.title}
+              </h3>
+              <p className="leading-relaxed text-[#5f5e60]">{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="overflow-hidden bg-black py-24 text-white md:py-[120px]">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-14 px-5 md:flex-row md:gap-20 md:px-8">
+          <div className="flex-1">
+            <h2 className="mb-8 text-4xl font-bold leading-tight md:text-5xl">
+              Solusi Cerdas, Tanpa Kompromi.
             </h2>
-            <p className="mt-5 text-lg leading-8 text-slate-600">
-              Dari rekomendasi dokter hingga akomodasi, layanan dirancang agar
-              pasien bisa fokus pada pengobatan.
-            </p>
+            <div className="space-y-12">
+              {solutions.map((item) => (
+                <div key={item.title} className="flex gap-6">
+                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white/10">
+                    <Icon name={item.icon} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="mb-2 text-2xl font-semibold leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="leading-relaxed text-gray-400">{item.text}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            {services.map((service, index) => (
-              <div
-                key={service}
-                className="flex min-h-24 gap-4 rounded-lg border border-slate-200 bg-slate-50 p-5"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-md bg-[#1b9bd7] text-sm font-extrabold text-white">
-                  {index + 1}
-                </span>
-                <p className="self-center text-lg font-bold text-slate-800">
-                  {service}
-                </p>
-              </div>
-            ))}
+          <div className="w-full flex-1">
+            <div className="relative aspect-square overflow-hidden rounded-[3rem]">
+              <Image
+                alt="A professional medical concierge assisting patients in a VIP lounge"
+                className="object-cover"
+                fill
+                sizes="(min-width: 768px) 50vw, 100vw"
+                src="/assets/concierge-lounge.jpg"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="bg-[#f6fbff] py-20">
+      <section id="layanan" className="bg-white py-24 md:py-[120px]">
         <div className="mx-auto max-w-7xl px-5 md:px-8">
-          <div className="max-w-2xl">
-            <p className="text-sm font-bold uppercase tracking-normal text-[#0b7eb6]">
-              Apa kata pasien tentang Medisata?
-            </p>
-            <h2 className="mt-3 text-3xl font-extrabold text-slate-950 md:text-5xl">
-              Ini Cerita Mereka . . .
+          <div className="mb-16 md:mb-20">
+            <h2 className="mb-4 text-3xl font-bold leading-tight text-black md:text-[32px]">
+              Layanan Tanpa Batas
             </h2>
+            <p className="text-lg leading-relaxed text-[#5f5e60] md:text-[19px]">
+              Didesain untuk ketenangan pikiran Anda dan keluarga.
+            </p>
           </div>
 
-          <div className="mt-10 grid gap-5 lg:grid-cols-3">
-            {testimonials.map((item) => (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+            {services.map((service) => (
               <article
-                key={item.name}
-                className="rounded-lg border border-sky-100 bg-white p-6 shadow-lg shadow-sky-900/5"
+                key={service.title}
+                className="group rounded-3xl border border-[#e2e2e4] bg-[#f9f9fb] p-8 transition duration-500 hover:bg-black"
               >
-                <div className="mb-5 text-4xl font-black text-[#f7c94b]">
-                  &quot;
-                </div>
-                <p className="min-h-32 text-base leading-7 text-slate-700">
-                  {item.quote}
+                <Icon
+                  name={service.icon}
+                  className="mb-6 block !text-3xl text-black transition group-hover:text-white"
+                />
+                <h3 className="mb-4 text-2xl font-semibold leading-snug text-black transition group-hover:text-white">
+                  {service.title}
+                </h3>
+                <p className="leading-relaxed text-[#5f5e60] transition group-hover:text-gray-400">
+                  {service.text}
                 </p>
-                <div className="mt-6 border-t border-slate-100 pt-5">
-                  <h3 className="font-extrabold text-slate-950">
-                    {item.name}
-                  </h3>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">
-                    {item.city} - {item.date}
-                  </p>
-                </div>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#0b7eb6] py-16 text-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 md:flex-row md:items-center md:justify-between md:px-8">
-          <div className="max-w-3xl">
-            <h2 className="text-3xl font-extrabold tracking-normal md:text-4xl">
-              Butuh rekomendasi rumah sakit, cek jadwal, atau minta perkiraan
-              biaya?
-            </h2>
-            <p className="mt-4 text-lg leading-8 text-sky-100">
-              Silakan masukan pertanyaan atau keluhan Anda, tim dokter kami akan
-              segera membantu.
-            </p>
+      <section
+        id="rumah-sakit"
+        className="border-y border-[#e2e2e4] bg-[#f3f3f5] py-24"
+      >
+        <div className="mx-auto max-w-7xl px-5 md:px-8">
+          <p className="mb-12 text-center text-xs font-semibold uppercase tracking-widest text-[#5f5e60]">
+            Mitra Rumah Sakit Utama Kami
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-16 opacity-60 grayscale transition duration-700 hover:opacity-100 hover:grayscale-0 md:gap-32">
+            {hospitals.map((hospital) => (
+              <div key={hospital.name} className="text-center">
+                <span className="block text-2xl font-bold tracking-normal text-black">
+                  {hospital.name}
+                </span>
+                <span className="mt-1 block text-xs text-[#5f5e60]">
+                  {hospital.location}
+                </span>
+              </div>
+            ))}
           </div>
-          <a
-            href="https://wa.me/"
-            className="inline-flex min-h-12 items-center justify-center rounded-md bg-white px-6 text-base font-extrabold text-[#0b7eb6] transition hover:bg-sky-50"
-          >
-            Hubungi Kami
-          </a>
         </div>
       </section>
 
-      <footer className="bg-slate-950 py-12 text-slate-300">
-        <div className="mx-auto grid max-w-7xl gap-8 px-5 md:grid-cols-4 md:px-8">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-md bg-[#1b9bd7] text-xl font-bold text-white">
-                M
-              </span>
-              <span className="text-2xl font-bold text-white">MediSata</span>
-            </div>
-            <p className="mt-4 max-w-xl leading-7 text-slate-400">
-              Layanan pendamping pasien untuk berobat ke Malaysia dan Singapura.
-            </p>
-          </div>
-          <div>
-            <h3 className="font-bold text-white">Informasi</h3>
-            <div className="mt-4 grid gap-3 text-sm">
-              <a href="#">Hubungi Kami</a>
-              <a href="#">Disclaimer</a>
-              <a href="#">Blog</a>
-            </div>
-          </div>
-          <div>
-            <h3 className="font-bold text-white">Social</h3>
-            <div className="mt-4 grid gap-3 text-sm">
-              <a href="#">Instagram</a>
-              <a href="#">Facebook</a>
-              <a href="#">YouTube</a>
-              <a href="#">TikTok</a>
+      <section
+        id="testimoni"
+        className="overflow-hidden bg-white py-24 md:py-[120px]"
+      >
+        <div className="mx-auto max-w-7xl px-5 md:px-8">
+          <div className="relative overflow-hidden rounded-[2rem] bg-[#f9f9fb] p-8 md:rounded-[4rem] md:p-24">
+            <div className="relative z-10 grid gap-12 md:grid-cols-2 md:items-center md:gap-16">
+              <div className="relative">
+                <span
+                  className="absolute -left-6 -top-12 text-7xl font-black leading-none text-black/10"
+                  aria-hidden="true"
+                >
+                  &quot;
+                </span>
+                <h2 className="mb-8 text-3xl font-bold italic leading-tight text-black md:text-[32px]">
+                  &quot;Saya tidak perlu memikirkan apapun selain kesembuhan
+                  istri saya. Segalanya sudah diatur dengan sangat elegan.&quot;
+                </h2>
+                <p className="mb-8 text-lg leading-relaxed text-[#5f5e60] md:text-[19px]">
+                  Proses pendaftaran dokter hingga penjemputan di bandara Kuala
+                  Lumpur berjalan mulus. Pendamping kami sangat memahami
+                  prosedur rumah sakit, membuat kami merasa seperti di rumah
+                  sendiri.
+                </p>
+                <div className="flex items-center gap-4">
+                  <div className="relative size-16 overflow-hidden rounded-full border-2 border-white shadow-lg">
+                    <Image
+                      alt="A portrait of a middle-aged gentleman"
+                      className="object-cover"
+                      fill
+                      sizes="64px"
+                      src="/assets/patient-portrait.jpg"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-bold text-black">Bapak Aris Subakti</p>
+                    <p className="text-sm text-[#5f5e60]">
+                      Pasien Kardiologi, 2023
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden md:block">
+                <div className="relative aspect-square rotate-3 overflow-hidden rounded-3xl shadow-2xl">
+                  <Image
+                    alt="A bright and airy clinical consultation room"
+                    className="object-cover"
+                    fill
+                    sizes="50vw"
+                    src="/assets/consultation-room.jpg"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div className="mx-auto mt-10 max-w-7xl border-t border-white/10 px-5 pt-6 text-sm text-slate-500 md:px-8">
-          All rights reserved. Medisata © 2026.
+      </section>
+
+      <section className="bg-black py-24 text-white md:py-[120px]">
+        <div className="mx-auto max-w-4xl px-5 text-center md:px-8">
+          <h2 className="mb-8 text-4xl font-bold leading-tight md:text-5xl">
+            Mulai Perjalanan Medis Anda Hari Ini
+          </h2>
+          <p className="mb-12 text-lg leading-relaxed text-[#c6c6c6] md:text-[19px]">
+            Konsultasi awal 100% gratis. Kami siap membantu Anda menemukan jalan
+            terbaik menuju kesembuhan.
+          </p>
+          <div className="flex flex-col justify-center gap-6 sm:flex-row">
+            <a
+              href={whatsappUrl}
+              className="inline-flex min-h-[68px] items-center justify-center rounded-full bg-white px-10 py-5 font-bold text-black transition hover:bg-gray-100"
+            >
+              Konsultasi Gratis
+            </a>
+            <a
+              href={whatsappUrl}
+              className="inline-flex min-h-[68px] items-center justify-center rounded-full border border-white/30 px-10 py-5 font-bold text-white transition hover:bg-white/10"
+            >
+              Hubungi Lewat WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-gray-200 bg-gray-50 px-5 py-16 text-sm leading-relaxed md:px-8 md:py-20">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 md:grid-cols-4 md:gap-12">
+          <div className="col-span-2 md:col-span-1">
+            <div className="mb-6 text-lg font-bold tracking-normal text-black">
+              Concierge Prime
+            </div>
+            <p className="mb-6 max-w-xs text-gray-500">
+              Penyedia layanan manajemen medis premium untuk pasien
+              internasional di Malaysia.
+            </p>
+            <div className="flex gap-4">
+              <Icon
+                name="share"
+                className="cursor-pointer text-gray-400 transition hover:text-black"
+              />
+              <Icon
+                name="mail"
+                className="cursor-pointer text-gray-400 transition hover:text-black"
+              />
+            </div>
+          </div>
+          <div>
+            <h3 className="mb-6 font-semibold text-black">Layanan</h3>
+            <ul className="space-y-4 text-gray-500">
+              {services.map((service) => (
+                <li key={service.title}>
+                  <a className="transition hover:text-black" href="#layanan">
+                    {service.title === "Pendampingan"
+                      ? "Pendampingan Pasien"
+                      : service.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="mb-6 font-semibold text-black">Rumah Sakit</h3>
+            <ul className="space-y-4 text-gray-500">
+              {hospitals.map((hospital) => (
+                <li key={hospital.name}>
+                  <a
+                    className="transition hover:text-black"
+                    href="#rumah-sakit"
+                  >
+                    {hospital.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 className="mb-6 font-semibold text-black">Kontak</h3>
+            <p className="text-gray-500">
+              Graha Prime Lt. 4
+              <br />
+              Jl. Sudirman No. 12
+              <br />
+              Jakarta Selatan
+            </p>
+            <p className="mt-4 font-semibold text-gray-500">
+              +62 812 3456 7890
+            </p>
+          </div>
+        </div>
+        <div className="mx-auto mt-20 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-gray-200 pt-8 text-gray-400 md:flex-row">
+          <p>Copyright 2024 Concierge Prime. All rights reserved.</p>
+          <div className="flex gap-8">
+            <a className="transition hover:text-black" href="#">
+              Kebijakan Privasi
+            </a>
+            <a className="transition hover:text-black" href="#">
+              Syarat & Ketentuan
+            </a>
+          </div>
         </div>
       </footer>
     </main>
