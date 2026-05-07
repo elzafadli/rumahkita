@@ -1,4 +1,6 @@
 import Image from "next/image";
+import ChatBot from "@/components/ChatBot";
+import SiteHeader from "@/components/shared/SiteHeader";
 
 type IconName =
   | "analytics"
@@ -109,51 +111,7 @@ function Icon({
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#f9f9fb] font-[Inter,Arial,sans-serif] text-[#1a1c1d] antialiased">
-      <header className="fixed top-0 z-50 w-full border-b border-gray-100/50 bg-white/80 shadow-[0_4px_30px_rgba(0,0,0,0.03)] backdrop-blur-2xl">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 md:px-8">
-          <a
-            href="#"
-            aria-label="Concierge Prime"
-            className="text-xl font-semibold tracking-tight text-black"
-          >
-            Concierge Prime
-          </a>
-
-          <nav className="hidden items-center gap-10 text-base font-medium md:flex">
-            <a
-              className="border-b-2 border-black pb-1 text-black"
-              href="#layanan"
-            >
-              Layanan
-            </a>
-            <a
-              className="text-gray-500 transition hover:text-black"
-              href="#rumah-sakit"
-            >
-              Rumah Sakit
-            </a>
-            <a
-              className="text-gray-500 transition hover:text-black"
-              href="#testimoni"
-            >
-              Testimoni
-            </a>
-            <a
-              className="text-gray-500 transition hover:text-black"
-              href="#tentang"
-            >
-              Tentang Kami
-            </a>
-          </nav>
-
-          <a
-            href={whatsappUrl}
-            className="inline-flex min-h-10 items-center justify-center rounded-full bg-black px-5 py-2 text-sm font-medium text-white transition active:scale-95 md:px-6"
-          >
-            Konsultasi Gratis
-          </a>
-        </div>
-      </header>
+      <SiteHeader active="home" />
 
       <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-black pt-20">
         <div className="absolute inset-0 z-0">
@@ -506,6 +464,7 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+      <ChatBot />
     </main>
   );
 }
