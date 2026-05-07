@@ -12,7 +12,7 @@ type ChatMessage = {
 
 const STORAGE_KEY = "medical_chat_session_id";
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://api.fincontrol.my.id/api";
 
 function renderMessageContent(content: string) {
   return content
@@ -31,7 +31,10 @@ function renderMessageContent(content: string) {
             className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800"
           >
             {isDoctorsLink ? "Lihat Dokter" : "Lihat Rumah Sakit"}
-            <span className="material-symbols-outlined !text-base" aria-hidden="true">
+            <span
+              className="material-symbols-outlined !text-base"
+              aria-hidden="true"
+            >
               open_in_new
             </span>
           </a>
@@ -60,7 +63,10 @@ function renderMessageContent(content: string) {
 
 function Icon({ name, className = "" }: { name: string; className?: string }) {
   return (
-    <span className={`material-symbols-outlined ${className}`} aria-hidden="true">
+    <span
+      className={`material-symbols-outlined ${className}`}
+      aria-hidden="true"
+    >
       {name}
     </span>
   );
@@ -152,7 +158,9 @@ export default function ChatBot() {
       const setAssistantText = (text: string) => {
         setMessages((current) =>
           current.map((message) =>
-            message.id === assistantId ? { ...message, content: text } : message,
+            message.id === assistantId
+              ? { ...message, content: text }
+              : message,
           ),
         );
       };
@@ -190,7 +198,8 @@ export default function ChatBot() {
 
         if (eventName === "error") {
           setAssistantText(
-            payload.message ?? "Maaf, layanan chat sedang bermasalah. Silakan coba lagi.",
+            payload.message ??
+              "Maaf, layanan chat sedang bermasalah. Silakan coba lagi.",
           );
         }
       };
@@ -255,7 +264,9 @@ export default function ChatBot() {
           <header className="flex items-center justify-between border-b border-gray-100 bg-black px-5 py-4 text-white">
             <div>
               <p className="text-sm font-semibold">Customer Service</p>
-              <p className="text-xs text-white/60">Berobat & perjalanan medis</p>
+              <p className="text-xs text-white/60">
+                Berobat & perjalanan medis
+              </p>
             </div>
             <div className="flex items-center gap-1">
               <button
@@ -303,12 +314,19 @@ export default function ChatBot() {
             <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={sendMessage} className="flex gap-2 border-t border-gray-100 bg-white p-3">
+          <form
+            onSubmit={sendMessage}
+            className="flex gap-2 border-t border-gray-100 bg-white p-3"
+          >
             <input
               value={input}
               onChange={(event) => setInput(event.target.value)}
               className="min-h-11 flex-1 rounded-full border border-gray-200 px-4 text-sm text-black outline-none transition placeholder:text-gray-400 focus:border-black"
-              placeholder={isSending ? "Boleh ketik pertanyaan berikutnya..." : "Tulis pertanyaan..."}
+              placeholder={
+                isSending
+                  ? "Boleh ketik pertanyaan berikutnya..."
+                  : "Tulis pertanyaan..."
+              }
             />
             <button
               type="submit"
