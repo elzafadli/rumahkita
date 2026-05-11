@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import ChatBot from "@/components/ChatBot";
+import ChatBot from "@/components/shared/ChatBot";
 import SiteHeader from "@/components/shared/SiteHeader";
 
 type IconName =

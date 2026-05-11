@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import ChatBot from "@/components/ChatBot";
+import { useMemo, useState } from "react";
+import ChatBot from "@/components/shared/ChatBot";
 import SiteHeader from "@/components/shared/SiteHeader";
+import type { Doctor } from "@/types/doctor";
 
 type IconName =
   | "arrow_back"
@@ -18,38 +19,6 @@ type IconName =
   | "search"
   | "verified";
 
-type Doctor = {
-  id: number;
-  slug: string;
-  name: string;
-  title: string | null;
-  specialization: string | null;
-  photo_url: string | null;
-  profile_url: string | null;
-  hospital: {
-    name: string;
-    city: string;
-    country: string;
-  } | null;
-  clinic_location: string | null;
-  languages: string[];
-  specialties: {
-    slug: string;
-    name: string;
-  }[];
-  consultation_hours_raw: string | null;
-};
-
-type DoctorsResponse = {
-  data: Doctor[];
-  meta?: {
-    total?: number;
-  };
-};
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api";
-const DOCTORS_URL = `${API_BASE_URL.replace(/\/$/, "")}/2/doctors`;
 const PAGE_SIZE = 12;
 
 function Icon({
@@ -75,58 +44,27 @@ function uniqueSorted(values: string[]) {
   );
 }
 
-export default function DoctorPage() {
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+function formatHospitalOption(doctor: Doctor) {
+  return doctor.hospital
+    ? `${doctor.hospital.name}, ${doctor.hospital.city}`
+    : "";
+}
+
+export default function DoctorPage({
+  initialDoctors,
+  initialError = "",
+}: {
+  initialDoctors: Doctor[];
+  initialError?: string;
+}) {
+  const doctors = initialDoctors;
+  const isLoading = false;
+  const error = initialError;
   const [search, setSearch] = useState("");
   const [specialization, setSpecialization] = useState("");
   const [hospital, setHospital] = useState("");
   const [language, setLanguage] = useState("");
   const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadDoctors() {
-      try {
-        setIsLoading(true);
-        setError("");
-
-        const response = await fetch(DOCTORS_URL, {
-          headers: { Accept: "application/json" },
-        });
-
-        if (!response.ok) {
-          throw new Error("Data dokter belum bisa dimuat.");
-        }
-
-        const payload = (await response.json()) as DoctorsResponse;
-
-        if (isMounted) {
-          setDoctors(payload.data ?? []);
-        }
-      } catch (loadError) {
-        if (isMounted) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Data dokter belum bisa dimuat.",
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    loadDoctors();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const filterOptions = useMemo(() => {
     const specializations = uniqueSorted(
@@ -136,13 +74,11 @@ export default function DoctorPage() {
       ]),
     );
     const hospitals = uniqueSorted(
-      doctors.map((doctor) =>
-        doctor.hospital
-          ? `${doctor.hospital.name} - ${doctor.hospital.city}`
-          : "",
-      ),
+      doctors.map((doctor) => formatHospitalOption(doctor)),
     );
-    const languages = uniqueSorted(doctors.flatMap((doctor) => doctor.languages));
+    const languages = uniqueSorted(
+      doctors.flatMap((doctor) => doctor.languages),
+    );
 
     return { specializations, hospitals, languages };
   }, [doctors]);
@@ -174,12 +110,12 @@ export default function DoctorPage() {
       const matchesSpecialization =
         specialization === "" ||
         doctor.specialization === specialization ||
-        doctor.specialties.some((specialty) => specialty.name === specialization);
+        doctor.specialties.some(
+          (specialty) => specialty.name === specialization,
+        );
       const matchesHospital =
         hospital === "" ||
-        (doctor.hospital
-          ? `${doctor.hospital.name} - ${doctor.hospital.city}` === hospital
-          : false);
+        (doctor.hospital ? formatHospitalOption(doctor) === hospital : false);
       const matchesLanguage =
         language === "" || doctor.languages.includes(language);
 
@@ -405,7 +341,8 @@ export default function DoctorPage() {
                           {doctor.name}
                         </h3>
                         <p className="mt-2 line-clamp-2 text-sm font-medium text-[#5f5e60]">
-                          {doctor.specialization ?? "Spesialisasi belum tersedia"}
+                          {doctor.specialization ??
+                            "Spesialisasi belum tersedia"}
                         </p>
                       </div>
                     </div>
@@ -438,7 +375,12 @@ export default function DoctorPage() {
                       <div className="flex flex-wrap gap-2">
                         {(doctor.specialties.length > 0
                           ? doctor.specialties.slice(0, 3)
-                          : [{ slug: "specialization", name: doctor.specialization }]
+                          : [
+                              {
+                                slug: "specialization",
+                                name: doctor.specialization,
+                              },
+                            ]
                         ).map((specialty, index) =>
                           specialty.name ? (
                             <span
@@ -457,16 +399,12 @@ export default function DoctorPage() {
                         <Icon name="verified" className="!text-lg" />
                         Profil Dokter
                       </div>
-                      {doctor.profile_url ? (
-                        <a
-                          href={doctor.profile_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex min-h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-semibold text-white transition hover:bg-gray-800"
-                        >
-                          Detail
-                        </a>
-                      ) : null}
+                      <Link
+                        href={`/dokter/${doctor.slug || doctor.id}`}
+                        className="inline-flex min-h-10 items-center justify-center rounded-full bg-black px-4 text-sm font-semibold text-white transition hover:bg-gray-800"
+                      >
+                        Detail
+                      </Link>
                     </div>
                   </article>
                 ))}
