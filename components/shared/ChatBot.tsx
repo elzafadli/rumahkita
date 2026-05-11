@@ -8,6 +8,7 @@ type ChatMessage = {
   id: string;
   role: ChatRole;
   content: string;
+  isComplete?: boolean;
 };
 
 const STORAGE_KEY = "medical_chat_session_id";
@@ -48,27 +49,40 @@ function getSendToAssistantMessage(content: string) {
     tokenIndex === -1
       ? normalizedContent
       : normalizedContent.slice(0, tokenIndex);
-  const summaryIndex = contentBeforeToken.lastIndexOf("Ringkasan pilihan:");
-  const summary =
-    summaryIndex === -1
-      ? contentBeforeToken.trim()
-      : contentBeforeToken.slice(summaryIndex).trim();
-  const plainSummary = summary
-    .replace(/\*\*([^*\n]+)\*\*/g, "$1")
-    .replace(/\*([^*\n]+)\*/g, "$1")
-    .replace(/\*/g, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .trim();
+  const plainSummary = getPlainChatSummary(contentBeforeToken);
 
   return `Saya ingin lanjut dengan pilihan ini:\n${plainSummary}`;
 }
 
-function sanitizeWhatsAppMessage(message: string) {
+function getPlainChatSummary(content: string) {
+  const lines = content.split("\n");
+  const summaryStartIndex = lines.findLastIndex((line) =>
+    /\bRingkasan pilihan\b/i.test(stripChatMarkdown(line)),
+  );
+  const summaryLines =
+    summaryStartIndex === -1 ? lines : lines.slice(summaryStartIndex);
+
+  return stripChatMarkdown(summaryLines.join("\n"));
+}
+
+function stripChatMarkdown(message: string) {
   return message
-    .replace(/\*/g, "")
+    .split("\n")
+    .map((line) =>
+      line
+        .replace(/\*\*/g, "")
+        .replace(/^\s*[＊*]\s+/g, "- ")
+        .replace(/[＊*]/g, "")
+        .replace(/\s+$/g, ""),
+    )
+    .join("\n")
     .replace(/\u200B|\u200C|\u200D|\uFEFF/g, "")
     .replace(/[ \t]+\n/g, "\n")
     .trim();
+}
+
+function sanitizeWhatsAppMessage(message: string) {
+  return stripChatMarkdown(message);
 }
 
 function getAssistantWhatsAppUrl(content: string) {
@@ -138,6 +152,7 @@ function normalizeHistoryMessages(payload: unknown): ChatMessage[] {
           id: getStringValue(item.id) || `history-${index}`,
           role,
           content,
+          isComplete: true,
         },
       ];
     }
@@ -151,6 +166,7 @@ function normalizeHistoryMessages(payload: unknown): ChatMessage[] {
         id: `${getStringValue(item.id) || `history-${index}`}-user`,
         role: "user",
         content: question,
+        isComplete: true,
       });
     }
 
@@ -159,6 +175,7 @@ function normalizeHistoryMessages(payload: unknown): ChatMessage[] {
         id: `${getStringValue(item.id) || `history-${index}`}-assistant`,
         role: "assistant",
         content: answer,
+        isComplete: true,
       });
     }
 
@@ -170,6 +187,7 @@ function renderMessageContent(
   content: string,
   onSelect: (message: string) => void,
   isSending: boolean,
+  isComplete: boolean,
 ) {
   const parts = content
     .replace(/\\n/g, "\n")
@@ -243,23 +261,13 @@ function renderMessageContent(
               {formatListLabel(label)}
             </span>
             <span className="flex max-w-full flex-nowrap items-center gap-1.5 overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => onSelect(`Dokter: ${doctorName}`)}
-                disabled={isSending}
-                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-200 bg-white px-2 py-1 text-[11px] font-semibold leading-none text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-60"
-                title={doctorName}
+              <a
+                href={`/dokter/${doctorId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-200 bg-sky-700 px-2 py-1 text-[11px] font-semibold leading-none text-white transition hover:bg-sky-800"
+                title={`Lihat detail ${doctorName}`}
               >
-                Pilih
-                <Icon name="send" className="!text-xs" />
-              </button>
-                <a
-                  href={`/dokter/${doctorId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex shrink-0 items-center gap-1 rounded-full border border-sky-200 bg-sky-700 px-2 py-1 text-[11px] font-semibold leading-none text-white transition hover:bg-sky-800"
-                  title={`Lihat detail ${doctorName}`}
-                >
                 Detail
                 <Icon name="arrow_forward" className="!text-xs" />
               </a>
@@ -308,6 +316,18 @@ function renderMessageContent(
     }
 
     if (SEND_TO_ASSISTANT_TOKENS.includes(part.trim())) {
+      if (isSending || !isComplete) {
+        return (
+          <span
+            key={`${part}-${index}`}
+            className="mt-3 inline-flex w-full cursor-wait items-center justify-center gap-2 rounded-2xl bg-gray-300 px-4 py-2.5 text-xs font-semibold text-white"
+          >
+            Menyiapkan link WhatsApp...
+            <Icon name="hourglass_top" className="!text-sm" />
+          </span>
+        );
+      }
+
       return (
         <a
           key={`${part}-${index}`}
@@ -365,6 +385,7 @@ export default function ChatBot() {
       role: "assistant",
       content:
         "Halo, saya siap bantu informasi berobat, dokter, rumah sakit, dan persiapan perjalanan medis Anda.",
+      isComplete: true,
     },
   ]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -440,8 +461,8 @@ export default function ChatBot() {
     setIsSending(true);
     setMessages((current) => [
       ...current,
-      { id: crypto.randomUUID(), role: "user", content },
-      { id: assistantId, role: "assistant", content: "" },
+      { id: crypto.randomUUID(), role: "user", content, isComplete: true },
+      { id: assistantId, role: "assistant", content: "", isComplete: false },
     ]);
 
     try {
@@ -474,17 +495,21 @@ export default function ChatBot() {
         setMessages((current) =>
           current.map((message) =>
             message.id === assistantId
-              ? { ...message, content: message.content + delta }
+              ? {
+                  ...message,
+                  content: message.content + delta,
+                  isComplete: false,
+                }
               : message,
           ),
         );
       };
 
-      const setAssistantText = (text: string) => {
+      const setAssistantText = (text: string, isComplete = false) => {
         setMessages((current) =>
           current.map((message) =>
             message.id === assistantId
-              ? { ...message, content: text }
+              ? { ...message, content: text, isComplete }
               : message,
           ),
         );
@@ -516,7 +541,15 @@ export default function ChatBot() {
           }
 
           if (payload.message?.content) {
-            setAssistantText(payload.message.content);
+            setAssistantText(payload.message.content, true);
+          } else {
+            setMessages((current) =>
+              current.map((message) =>
+                message.id === assistantId
+                  ? { ...message, isComplete: true }
+                  : message,
+              ),
+            );
           }
           return;
         }
@@ -525,6 +558,7 @@ export default function ChatBot() {
           setAssistantText(
             payload.message ??
               "Maaf, layanan chat sedang bermasalah. Silakan coba lagi.",
+            true,
           );
         }
       };
@@ -558,6 +592,7 @@ export default function ChatBot() {
                   error instanceof Error
                     ? error.message
                     : "Maaf, layanan chat sedang bermasalah. Silakan coba lagi.",
+                isComplete: true,
               }
             : message,
         ),
@@ -580,6 +615,7 @@ export default function ChatBot() {
         id: "welcome-reset",
         role: "assistant",
         content: "Session baru sudah dimulai. Ada yang bisa saya bantu?",
+        isComplete: true,
       },
     ]);
   }
@@ -638,6 +674,7 @@ export default function ChatBot() {
                         message.content,
                         sendChatMessage,
                         isSending || isLoadingHistory,
+                        message.isComplete ?? message.role !== "assistant",
                       )
                     : message.role === "assistant"
                       ? "Sedang mengetik..."
