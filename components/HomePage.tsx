@@ -1,23 +1,24 @@
 import Image from "next/image";
+import Link from "next/link";
+import { getHospitals } from "@/lib/hospitals";
+import { getAssistantWhatsAppUrl } from "@/lib/whatsapp";
 import ChatBot from "@/components/shared/ChatBot";
+import SiteFooter from "@/components/shared/SiteFooter";
 import SiteHeader from "@/components/shared/SiteHeader";
+import type { Hospital } from "@/types/hospital";
 
 type IconName =
   | "analytics"
   | "calendar_month"
   | "keyboard_arrow_down"
   | "concierge"
-  | "mail"
   | "payments"
   | "receipt_long"
   | "route"
   | "person_search"
-  | "share"
   | "magic_button"
   | "support_agent"
   | "travel_explore";
-
-const destinations = ["Melaka", "Johor Bahru", "Penang", "Kuala Lumpur"];
 
 const painPoints = [
   {
@@ -78,18 +79,30 @@ const services = [
   },
 ];
 
-const hospitals = [
-  {
-    name: "Mahkota Medical Centre",
-    location: "Melaka, Malaysia",
-  },
-  {
-    name: "Regency Specialist Hospital",
-    location: "Johor Bahru, Malaysia",
-  },
-];
+const whatsappMessage = `Halo, Saya ingin konsultasi dengan Kantor Perwakilan Resmi Mahkota Medical Centre dan Regency Specialist Hospital.
 
-const whatsappUrl = "https://wa.me/";
+Mohon bantuannya untuk konsultasi lebih lanjut. Terima kasih`;
+const whatsappUrl = getAssistantWhatsAppUrl(whatsappMessage);
+const costEstimateWhatsAppMessage = `Halo, Saya ingin konsultasi dengan Kantor Perwakilan Resmi Mahkota Medical Centre dan Regency Specialist Hospital.
+
+Saya ingin Cek Estimasi Biaya untuk berobat ke Malaysia.
+
+Mohon bantuannya untuk konsultasi lebih lanjut. Terima kasih`;
+const costEstimateWhatsAppUrl = getAssistantWhatsAppUrl(
+  costEstimateWhatsAppMessage,
+);
+
+function formatHospitalLocation(hospital: Hospital) {
+  if (!hospital.city) {
+    return "Malaysia";
+  }
+
+  return `${hospital.city.name}, ${hospital.city.country}`;
+}
+
+function getHospitalHref(hospital: Hospital) {
+  return `/rumah-sakit/${hospital.source_reference ?? hospital.id}`;
+}
 
 function Icon({
   name,
@@ -108,7 +121,33 @@ function Icon({
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  let hospitals: Hospital[] = [];
+
+  try {
+    const payload = await getHospitals();
+    hospitals = payload.data ?? [];
+  } catch {
+    hospitals = [];
+  }
+
+  const destinations = Array.from(
+    hospitals
+      .reduce((cities, hospital) => {
+        const cityName = hospital.city?.name?.trim();
+
+        if (cityName && !cities.has(cityName)) {
+          cities.set(cityName, {
+            href: getHospitalHref(hospital),
+            name: cityName,
+          });
+        }
+
+        return cities;
+      }, new Map<string, { href: string; name: string }>())
+      .values(),
+  );
+
   return (
     <main className="min-h-screen bg-[#f9f9fb] font-[Inter,Arial,sans-serif] text-[#1a1c1d] antialiased">
       <SiteHeader active="home" />
@@ -145,13 +184,13 @@ export default function HomePage() {
             </p>
             <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               {destinations.map((destination) => (
-                <a
-                  key={destination}
-                  href={whatsappUrl}
+                <Link
+                  key={destination.name}
+                  href={destination.href}
                   className="rounded-full border border-white/20 bg-white/10 px-6 py-2 font-medium text-white backdrop-blur-md transition hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/50"
                 >
-                  {destination}
-                </a>
+                  {destination.name}
+                </Link>
               ))}
             </div>
           </div>
@@ -159,12 +198,16 @@ export default function HomePage() {
           <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
             <a
               href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex min-h-[68px] items-center justify-center rounded-full bg-white px-10 py-5 text-lg font-bold text-black shadow-2xl transition hover:bg-gray-200 active:scale-95"
             >
               Konsultasi Gratis
             </a>
             <a
-              href={whatsappUrl}
+              href={costEstimateWhatsAppUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex min-h-[68px] items-center justify-center rounded-full border border-white/30 bg-white/10 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition hover:bg-white/20"
             >
               Cek Estimasi Biaya
@@ -295,7 +338,7 @@ export default function HomePage() {
                   {hospital.name}
                 </span>
                 <span className="mt-1 block text-xs text-[#5f5e60]">
-                  {hospital.location}
+                  {formatHospitalLocation(hospital)}
                 </span>
               </div>
             ))}
@@ -374,12 +417,16 @@ export default function HomePage() {
           <div className="flex flex-col justify-center gap-6 sm:flex-row">
             <a
               href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex min-h-[68px] items-center justify-center rounded-full bg-white px-10 py-5 font-bold text-black transition hover:bg-gray-100"
             >
               Konsultasi Gratis
             </a>
             <a
               href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex min-h-[68px] items-center justify-center rounded-full border border-white/30 px-10 py-5 font-bold text-white transition hover:bg-white/10"
             >
               Hubungi Lewat WhatsApp
@@ -388,82 +435,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t border-gray-200 bg-gray-50 px-5 py-16 text-sm leading-relaxed md:px-8 md:py-20">
-        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 md:grid-cols-4 md:gap-12">
-          <div className="col-span-2 md:col-span-1">
-            <div className="mb-6 text-lg font-bold tracking-normal text-black">
-              Concierge Prime
-            </div>
-            <p className="mb-6 max-w-xs text-gray-500">
-              Penyedia layanan manajemen medis premium untuk pasien
-              internasional di Malaysia.
-            </p>
-            <div className="flex gap-4">
-              <Icon
-                name="share"
-                className="cursor-pointer text-gray-400 transition hover:text-black"
-              />
-              <Icon
-                name="mail"
-                className="cursor-pointer text-gray-400 transition hover:text-black"
-              />
-            </div>
-          </div>
-          <div>
-            <h3 className="mb-6 font-semibold text-black">Layanan</h3>
-            <ul className="space-y-4 text-gray-500">
-              {services.map((service) => (
-                <li key={service.title}>
-                  <a className="transition hover:text-black" href="#layanan">
-                    {service.title === "Pendampingan"
-                      ? "Pendampingan Pasien"
-                      : service.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="mb-6 font-semibold text-black">Rumah Sakit</h3>
-            <ul className="space-y-4 text-gray-500">
-              {hospitals.map((hospital) => (
-                <li key={hospital.name}>
-                  <a
-                    className="transition hover:text-black"
-                    href="#rumah-sakit"
-                  >
-                    {hospital.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3 className="mb-6 font-semibold text-black">Kontak</h3>
-            <p className="text-gray-500">
-              Graha Prime Lt. 4
-              <br />
-              Jl. Sudirman No. 12
-              <br />
-              Jakarta Selatan
-            </p>
-            <p className="mt-4 font-semibold text-gray-500">
-              +62 812 3456 7890
-            </p>
-          </div>
-        </div>
-        <div className="mx-auto mt-20 flex max-w-7xl flex-col items-center justify-between gap-4 border-t border-gray-200 pt-8 text-gray-400 md:flex-row">
-          <p>Copyright 2024 Concierge Prime. All rights reserved.</p>
-          <div className="flex gap-8">
-            <a className="transition hover:text-black" href="#">
-              Kebijakan Privasi
-            </a>
-            <a className="transition hover:text-black" href="#">
-              Syarat & Ketentuan
-            </a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
       <ChatBot />
     </main>
   );

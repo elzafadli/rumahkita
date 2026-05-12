@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { getAssistantWhatsAppUrl } from "@/lib/whatsapp";
 
 type ChatRole = "assistant" | "user";
 
@@ -15,7 +16,6 @@ const STORAGE_KEY = "medical_chat_session_id";
 const CHAT_STREAM_URL = "/api/chat/stream";
 const CHAT_HISTORY_URL = (sessionId: string) =>
   `/api/chat/${encodeURIComponent(sessionId)}/history`;
-const ASSISTANT_WHATSAPP_NUMBER = "6281216166848";
 const SEND_TO_ASSISTANT_TOKENS = [":send-to-assistent", ":send-to-assistant"];
 
 function getHospitalName(label: string) {
@@ -51,7 +51,7 @@ function getSendToAssistantMessage(content: string) {
       : normalizedContent.slice(0, tokenIndex);
   const plainSummary = getPlainChatSummary(contentBeforeToken);
 
-  return `Saya ingin lanjut dengan pilihan ini:\n${plainSummary}`;
+  return `Halo, Saya ingin konsultasi dengan Kantor Perwakilan Resmi Mahkota Medical Centre dan Regency Specialist Hospital.\n\n${plainSummary}\n\nMohon bantuannya untuk konsultasi lebih lanjut. Terima kasih`;
 }
 
 function getPlainChatSummary(content: string) {
@@ -81,16 +81,10 @@ function stripChatMarkdown(message: string) {
     .trim();
 }
 
-function sanitizeWhatsAppMessage(message: string) {
-  return stripChatMarkdown(message);
-}
+function getChatAssistantWhatsAppUrl(content: string) {
+  const message = stripChatMarkdown(getSendToAssistantMessage(content));
 
-function getAssistantWhatsAppUrl(content: string) {
-  const message = sanitizeWhatsAppMessage(getSendToAssistantMessage(content));
-
-  return `https://wa.me/${ASSISTANT_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    message,
-  )}`;
+  return getAssistantWhatsAppUrl(message);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -331,13 +325,13 @@ function renderMessageContent(
       return (
         <a
           key={`${part}-${index}`}
-          href={getAssistantWhatsAppUrl(content)}
+          href={getChatAssistantWhatsAppUrl(content)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-black px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-gray-800"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#1ebe5d]"
         >
-          Kirim pilihan ke WhatsApp
-          <Icon name="send" className="!text-sm" />
+          <WhatsAppIcon className="size-4" />
+          Eko Ardyanto
         </a>
       );
     }
@@ -373,8 +367,22 @@ function Icon({ name, className = "" }: { name: string; className?: string }) {
   );
 }
 
+function WhatsAppIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M16.01 3.2A12.72 12.72 0 0 0 5.15 22.5L3.5 28.8l6.45-1.6A12.69 12.69 0 0 0 16 28.8h.01A12.8 12.8 0 0 0 28.8 16 12.8 12.8 0 0 0 16.01 3.2Zm0 23.4a10.54 10.54 0 0 1-5.38-1.47l-.39-.23-3.83.95 1.02-3.72-.25-.38A10.52 10.52 0 1 1 16.01 26.6Zm5.76-7.9c-.32-.16-1.87-.92-2.16-1.03-.29-.1-.5-.16-.71.16-.21.31-.81 1.03-.99 1.24-.18.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57-.94-.84-1.58-1.88-1.76-2.2-.18-.31-.02-.48.14-.64.14-.14.32-.37.47-.55.16-.18.21-.31.32-.52.11-.21.05-.39-.03-.55-.08-.16-.71-1.72-.97-2.36-.26-.62-.52-.53-.71-.54h-.6c-.21 0-.55.08-.84.39-.29.31-1.1 1.08-1.1 2.63 0 1.55 1.13 3.05 1.29 3.26.16.21 2.23 3.4 5.39 4.77.75.33 1.34.52 1.8.66.76.24 1.45.21 2 .13.61-.09 1.87-.76 2.14-1.5.26-.73.26-1.36.18-1.5-.08-.13-.29-.21-.61-.37Z" />
+    </svg>
+  );
+}
+
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -389,6 +397,21 @@ export default function ChatBot() {
     },
   ]);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const showTimer = window.setTimeout(() => {
+      setShowGreeting(true);
+    }, 5000);
+
+    const hideTimer = window.setTimeout(() => {
+      setShowGreeting(false);
+    }, 10000);
+
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+    };
+  }, []);
 
   useEffect(() => {
     const storedSessionId = localStorage.getItem(STORAGE_KEY);
@@ -607,19 +630,6 @@ export default function ChatBot() {
     await sendChatMessage(input.trim());
   }
 
-  function resetSession() {
-    localStorage.removeItem(STORAGE_KEY);
-    setSessionId(null);
-    setMessages([
-      {
-        id: "welcome-reset",
-        role: "assistant",
-        content: "Session baru sudah dimulai. Ada yang bisa saya bantu?",
-        isComplete: true,
-      },
-    ]);
-  }
-
   return (
     <div className="fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 md:bottom-8 md:right-8">
       {isOpen ? (
@@ -635,15 +645,6 @@ export default function ChatBot() {
               </p>
             </div>
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={resetSession}
-                className="flex size-9 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
-                aria-label="Mulai chat baru"
-                title="Mulai chat baru"
-              >
-                <Icon name="refresh" />
-              </button>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
@@ -719,9 +720,23 @@ export default function ChatBot() {
         </section>
       ) : null}
 
+      {showGreeting && !isOpen ? (
+        <div
+          className="relative rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-[0_14px_35px_rgba(0,0,0,0.18)] ring-1 ring-black/10"
+          role="status"
+          aria-live="polite"
+        >
+          Halo
+          <span className="absolute -bottom-1.5 right-5 size-3 rotate-45 bg-white ring-1 ring-black/10" />
+        </div>
+      ) : null}
+
       <button
         type="button"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={() => {
+          setShowGreeting(false);
+          setIsOpen((current) => !current);
+        }}
         className={`size-14 items-center justify-center rounded-full bg-black text-white shadow-[0_18px_45px_rgba(0,0,0,0.25)] transition hover:bg-gray-800 active:scale-95 md:flex ${
           isOpen ? "hidden" : "flex"
         }`}
