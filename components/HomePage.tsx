@@ -152,7 +152,7 @@ export default async function HomePage() {
     <main className="min-h-screen bg-[#f9f9fb] font-[Inter,Arial,sans-serif] text-[#1a1c1d] antialiased">
       <SiteHeader active="home" />
 
-      <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-black pt-20">
+      <section className="relative flex min-h-[680px] items-center justify-center overflow-hidden bg-black px-0 py-28 sm:py-32 lg:min-h-screen lg:py-24">
         <div className="absolute inset-0 z-0">
           <Image
             alt="Premium Hospital Environment"
@@ -166,19 +166,19 @@ export default async function HomePage() {
         </div>
 
         <div className="relative z-10 mx-auto max-w-5xl px-5 text-center md:px-8">
-          <span className="mb-8 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-md">
+          <span className="mb-5 inline-block rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-md md:mb-6">
             Eksklusif Ke Malaysia
           </span>
-          <h1 className="mb-8 text-5xl font-bold leading-[1.05] tracking-normal text-white md:text-7xl lg:text-8xl">
+          <h1 className="mb-6 text-4xl font-bold leading-[1.05] tracking-normal text-white sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
             Berobat ke Malaysia <br className="hidden md:block" />
             Tanpa Ribet
           </h1>
-          <p className="mx-auto mb-12 max-w-2xl text-xl leading-relaxed text-gray-300 md:text-2xl">
+          <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed text-gray-300 sm:text-lg md:text-xl lg:text-[22px]">
             Dari konsultasi hingga kepulangan, kami urus semuanya. Fokuslah pada
             kesembuhan Anda, biarkan kami menangani logistiknya.
           </p>
 
-          <div className="mb-10">
+          <div className="mb-8">
             <p className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-white/60">
               Pilih Destinasi:
             </p>
@@ -187,7 +187,7 @@ export default async function HomePage() {
                 <Link
                   key={destination.name}
                   href={destination.href}
-                  className="rounded-full border border-white/20 bg-white/10 px-6 py-2 font-medium text-white backdrop-blur-md transition hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/50"
+                  className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-md transition hover:bg-white hover:text-black focus:outline-none focus:ring-2 focus:ring-white/50 md:px-6 md:text-base"
                 >
                   {destination.name}
                 </Link>
@@ -195,12 +195,12 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:gap-4">
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[68px] items-center justify-center rounded-full bg-white px-10 py-5 text-lg font-bold text-black shadow-2xl transition hover:bg-gray-200 active:scale-95"
+              className="inline-flex min-h-12 w-full max-w-xs items-center justify-center rounded-full bg-white px-6 py-3 text-base font-bold text-black shadow-2xl transition hover:bg-gray-200 active:scale-95 sm:w-auto md:min-h-14 md:px-8 md:text-lg"
             >
               Konsultasi Gratis
             </a>
@@ -208,14 +208,14 @@ export default async function HomePage() {
               href={costEstimateWhatsAppUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[68px] items-center justify-center rounded-full border border-white/30 bg-white/10 px-10 py-5 text-lg font-bold text-white backdrop-blur-md transition hover:bg-white/20"
+              className="inline-flex min-h-12 w-full max-w-xs items-center justify-center rounded-full border border-white/30 bg-white/10 px-6 py-3 text-base font-bold text-white backdrop-blur-md transition hover:bg-white/20 sm:w-auto md:min-h-14 md:px-8 md:text-lg"
             >
               Cek Estimasi Biaya
             </a>
           </div>
         </div>
 
-        <div className="absolute bottom-1 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-white/40 md:flex">
+        <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 text-white/40 xl:flex">
           <span className="text-[10px] uppercase tracking-widest">
             Scroll untuk mengeksplor
           </span>

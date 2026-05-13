@@ -3,8 +3,21 @@ import { buildApiUrl } from "@/constants/api";
 
 export const revalidate = 3600;
 
-export async function GET() {
-  const doctorsUrl = buildApiUrl("/2/doctors");
+function getDoctorsCacheTags(hospitalId: string) {
+  return ["doctors", `hospital-${hospitalId}-doctors`];
+}
+
+function withDoctorsCacheScope(url: string, hospitalId: string) {
+  const scopedUrl = new URL(url);
+  scopedUrl.searchParams.set("hospitalId", hospitalId);
+
+  return scopedUrl.toString();
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const hospitalId = searchParams.get("hospitalId") ?? "2";
+  const doctorsUrl = buildApiUrl(`/${hospitalId}/doctors`);
 
   if (!doctorsUrl) {
     return NextResponse.json(
@@ -14,9 +27,12 @@ export async function GET() {
   }
 
   try {
-    const response = await fetch(doctorsUrl, {
+    const response = await fetch(withDoctorsCacheScope(doctorsUrl, hospitalId), {
       headers: { Accept: "application/json" },
-      next: { revalidate },
+      next: {
+        revalidate,
+        tags: getDoctorsCacheTags(hospitalId),
+      },
     });
 
     const contentType = response.headers.get("content-type") ?? "";

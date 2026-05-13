@@ -20,15 +20,22 @@ const navItems = [
   { key: "testimonials", label: "Testimoni", href: "/#testimoni" },
 ] as const;
 
+const doctorHospitalNames = [
+  "Mahkota Medical Centre",
+  "Regency Specialist Hospital",
+];
+
 export default function SiteHeader({ active }: { active: ActiveNav }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isHospitalMenuOpen, setIsHospitalMenuOpen] = useState(false);
+  const [isDoctorMenuOpen, setIsDoctorMenuOpen] = useState(false);
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [hasLoadedHospitals, setHasLoadedHospitals] = useState(false);
   const hospitalMenuRef = useRef<HTMLDivElement>(null);
+  const doctorMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isHospitalMenuOpen || hasLoadedHospitals) {
+    if ((!isHospitalMenuOpen && !isDoctorMenuOpen) || hasLoadedHospitals) {
       return;
     }
 
@@ -60,7 +67,7 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
     return () => {
       isMounted = false;
     };
-  }, [hasLoadedHospitals, isHospitalMenuOpen]);
+  }, [hasLoadedHospitals, isDoctorMenuOpen, isHospitalMenuOpen]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -69,6 +76,13 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
         !hospitalMenuRef.current.contains(event.target as Node)
       ) {
         setIsHospitalMenuOpen(false);
+      }
+
+      if (
+        doctorMenuRef.current &&
+        !doctorMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsDoctorMenuOpen(false);
       }
     }
 
@@ -83,10 +97,19 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
     return `/rumah-sakit/${hospital.source_reference ?? hospital.id}`;
   }
 
+  function getDoctorHref(hospital: Hospital) {
+    return `/dokter?hospitalId=${hospital.id}`;
+  }
+
   function closeMenus() {
     setIsHospitalMenuOpen(false);
+    setIsDoctorMenuOpen(false);
     setIsMobileMenuOpen(false);
   }
+
+  const doctorHospitals = hospitals.filter((hospital) =>
+    doctorHospitalNames.includes(hospital.name),
+  );
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-gray-100/50 bg-white/80 shadow-[0_4px_30px_rgba(0,0,0,0.03)] backdrop-blur-2xl">
@@ -101,24 +124,41 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
 
         <nav className="hidden items-center gap-8 text-base font-medium md:flex">
           {navItems.map((item) => {
-            if (item.key === "hospitals" && active === "hospitals") {
+            if (item.key === "hospitals" || item.key === "doctors") {
+              const isDoctors = item.key === "doctors";
+              const isActive = item.key === active;
+              const isOpen = isDoctors ? isDoctorMenuOpen : isHospitalMenuOpen;
+              const menuHospitals = isDoctors ? doctorHospitals : hospitals;
+
               return (
                 <div
                   key={item.key}
-                  ref={hospitalMenuRef}
+                  ref={isDoctors ? doctorMenuRef : hospitalMenuRef}
                   className="relative"
                 >
                   <button
                     type="button"
-                    aria-expanded={isHospitalMenuOpen}
+                    aria-expanded={isOpen}
                     aria-haspopup="menu"
-                    className="inline-flex items-center gap-2 border-b-2 border-black pb-1 text-black"
-                    onClick={() => setIsHospitalMenuOpen((open) => !open)}
+                    className={
+                      isActive
+                        ? "inline-flex items-center gap-2 border-b-2 border-black pb-1 text-black"
+                        : "inline-flex items-center gap-2 text-gray-500 transition hover:text-black"
+                    }
+                    onClick={() => {
+                      if (isDoctors) {
+                        setIsDoctorMenuOpen((open) => !open);
+                        setIsHospitalMenuOpen(false);
+                      } else {
+                        setIsHospitalMenuOpen((open) => !open);
+                        setIsDoctorMenuOpen(false);
+                      }
+                    }}
                   >
                     {item.label}
                     <span
                       className={`material-symbols-outlined !text-base transition ${
-                        isHospitalMenuOpen ? "rotate-180" : ""
+                        isOpen ? "rotate-180" : ""
                       }`}
                       aria-hidden="true"
                     >
@@ -126,12 +166,12 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
                     </span>
                   </button>
 
-                  {isHospitalMenuOpen ? (
+                  {isOpen ? (
                     <div
                       role="menu"
                       className="absolute left-0 top-full mt-4 w-80 overflow-hidden rounded-xl border border-gray-200 bg-white p-2 shadow-[0_24px_60px_rgba(0,0,0,0.14)]"
                     >
-                      {hasLoadedHospitals && hospitals.length === 0 ? (
+                      {hasLoadedHospitals && menuHospitals.length === 0 ? (
                         <div className="px-3 py-3 text-sm text-gray-500">
                           Daftar rumah sakit belum tersedia.
                         </div>
@@ -143,13 +183,17 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
                         </div>
                       ) : null}
 
-                      {hospitals.map((hospital) => (
+                      {menuHospitals.map((hospital) => (
                         <Link
                           key={hospital.id}
                           role="menuitem"
-                          href={getHospitalHref(hospital)}
+                          href={
+                            isDoctors
+                              ? getDoctorHref(hospital)
+                              : getHospitalHref(hospital)
+                          }
                           className="block rounded-lg px-3 py-3 text-sm text-gray-700 transition hover:bg-gray-50 hover:text-black"
-                          onClick={() => setIsHospitalMenuOpen(false)}
+                          onClick={closeMenus}
                         >
                           <span className="block font-medium">
                             {hospital.name}
@@ -215,22 +259,43 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
         >
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 text-base font-medium">
             {navItems.map((item) => {
-              if (item.key === "hospitals" && active === "hospitals") {
+              if (item.key === "hospitals" || item.key === "doctors") {
+                const isDoctors = item.key === "doctors";
+                const isActive = item.key === active;
+                const isOpen = isDoctors ? isDoctorMenuOpen : isHospitalMenuOpen;
+                const menuHospitals = isDoctors ? doctorHospitals : hospitals;
+
                 return (
                   <div key={item.key}>
                     <button
                       type="button"
-                      aria-expanded={isHospitalMenuOpen}
+                      aria-expanded={isOpen}
                       aria-haspopup="menu"
-                      className="flex min-h-12 w-full items-center justify-between border-b border-gray-100 text-left text-black"
-                      onClick={() => setIsHospitalMenuOpen((open) => !open)}
+                      className={`flex min-h-12 w-full items-center justify-between border-b border-gray-100 text-left transition hover:text-black ${
+                        isActive ? "text-black" : "text-gray-600"
+                      }`}
+                      onClick={() => {
+                        if (isDoctors) {
+                          setIsDoctorMenuOpen((open) => !open);
+                          setIsHospitalMenuOpen(false);
+                        } else {
+                          setIsHospitalMenuOpen((open) => !open);
+                          setIsDoctorMenuOpen(false);
+                        }
+                      }}
                     >
-                      <span className="border-b-2 border-black py-3">
+                      <span
+                        className={
+                          isActive
+                            ? "border-b-2 border-black py-3"
+                            : "py-3"
+                        }
+                      >
                         {item.label}
                       </span>
                       <span
                         className={`material-symbols-outlined transition ${
-                          isHospitalMenuOpen ? "rotate-180" : ""
+                          isOpen ? "rotate-180" : ""
                         }`}
                         aria-hidden="true"
                       >
@@ -238,12 +303,12 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
                       </span>
                     </button>
 
-                    {isHospitalMenuOpen ? (
+                    {isOpen ? (
                       <div
                         role="menu"
                         className="max-h-80 overflow-y-auto border-b border-gray-100 py-2"
                       >
-                        {hasLoadedHospitals && hospitals.length === 0 ? (
+                        {hasLoadedHospitals && menuHospitals.length === 0 ? (
                           <div className="px-3 py-3 text-sm text-gray-500">
                             Daftar rumah sakit belum tersedia.
                           </div>
@@ -255,11 +320,15 @@ export default function SiteHeader({ active }: { active: ActiveNav }) {
                           </div>
                         ) : null}
 
-                        {hospitals.map((hospital) => (
+                        {menuHospitals.map((hospital) => (
                           <Link
                             key={hospital.id}
                             role="menuitem"
-                            href={getHospitalHref(hospital)}
+                            href={
+                              isDoctors
+                                ? getDoctorHref(hospital)
+                                : getHospitalHref(hospital)
+                            }
                             className="block rounded-lg px-3 py-3 text-sm text-gray-700 transition hover:bg-gray-50 hover:text-black"
                             onClick={closeMenus}
                           >

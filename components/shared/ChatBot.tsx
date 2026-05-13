@@ -405,7 +405,7 @@ export default function ChatBot() {
 
     const hideTimer = window.setTimeout(() => {
       setShowGreeting(false);
-    }, 10000);
+    }, 20000);
 
     return () => {
       window.clearTimeout(showTimer);
@@ -726,7 +726,7 @@ export default function ChatBot() {
           role="status"
           aria-live="polite"
         >
-          Halo
+          Halo, saya siap bantu informasi berobat
           <span className="absolute -bottom-1.5 right-5 size-3 rotate-45 bg-white ring-1 ring-black/10" />
         </div>
       ) : null}

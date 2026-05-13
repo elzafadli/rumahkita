@@ -148,12 +148,6 @@ function uniqueSorted(values: string[]) {
   );
 }
 
-function formatHospitalOption(doctor: Doctor) {
-  return doctor.hospital
-    ? `${doctor.hospital.name}, ${doctor.hospital.city}`
-    : "";
-}
-
 function toSelectOptions(allLabel: string, values: string[]) {
   return [
     { label: allLabel, value: "" },
@@ -208,7 +202,6 @@ export default function DoctorPage({
   const error = initialError;
   const [search, setSearch] = useState("");
   const [specialization, setSpecialization] = useState("");
-  const [hospital, setHospital] = useState("");
   const [language, setLanguage] = useState("");
   const [page, setPage] = useState(1);
 
@@ -219,23 +212,16 @@ export default function DoctorPage({
         ...doctor.specialties.map((specialty) => specialty.name),
       ]),
     );
-    const hospitals = uniqueSorted(
-      doctors.map((doctor) => formatHospitalOption(doctor)),
-    );
     const languages = uniqueSorted(
       doctors.flatMap((doctor) => doctor.languages),
     );
 
-    return { specializations, hospitals, languages };
+    return { specializations, languages };
   }, [doctors]);
 
   const specializationOptions = useMemo(
     () => toSelectOptions("Semua spesialisasi", filterOptions.specializations),
     [filterOptions.specializations],
-  );
-  const hospitalOptions = useMemo(
-    () => toSelectOptions("Semua rumah sakit", filterOptions.hospitals),
-    [filterOptions.hospitals],
   );
   const languageOptions = useMemo(
     () => toSelectOptions("Semua bahasa", filterOptions.languages),
@@ -272,20 +258,12 @@ export default function DoctorPage({
         doctor.specialties.some(
           (specialty) => specialty.name === specialization,
         );
-      const matchesHospital =
-        hospital === "" ||
-        (doctor.hospital ? formatHospitalOption(doctor) === hospital : false);
       const matchesLanguage =
         language === "" || doctor.languages.includes(language);
 
-      return (
-        matchesSearch &&
-        matchesSpecialization &&
-        matchesHospital &&
-        matchesLanguage
-      );
+      return matchesSearch && matchesSpecialization && matchesLanguage;
     });
-  }, [doctors, hospital, language, search, specialization]);
+  }, [doctors, language, search, specialization]);
 
   const totalPages = Math.max(1, Math.ceil(filteredDoctors.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -297,7 +275,6 @@ export default function DoctorPage({
   function clearFilters() {
     setSearch("");
     setSpecialization("");
-    setHospital("");
     setLanguage("");
     setPage(1);
   }
@@ -320,8 +297,8 @@ export default function DoctorPage({
           </div>
         </section>
 
-        <section className="sticky top-24 z-30 mb-10 rounded-xl border border-[#bccabd]/40 bg-white/85 p-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] backdrop-blur-2xl">
-          <div className="grid gap-3 lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto]">
+        <section className="relative z-20 mb-10 rounded-xl border border-[#bccabd]/40 bg-white/85 p-4 shadow-[0_4px_24px_rgba(0,0,0,0.04)] backdrop-blur-2xl lg:sticky lg:top-24 lg:z-30">
+          <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_auto]">
             <label className="relative block">
               <span className="sr-only">Cari dokter</span>
               <Icon
@@ -348,20 +325,6 @@ export default function DoctorPage({
                 value={specialization}
                 onChange={(value) => {
                   setSpecialization(value);
-                  setPage(1);
-                }}
-              />
-            </label>
-
-            <label>
-              <span className="sr-only">Filter rumah sakit</span>
-              <FilterSelect
-                ariaLabel="Filter rumah sakit"
-                instanceId="doctor-hospital-filter"
-                options={hospitalOptions}
-                value={hospital}
-                onChange={(value) => {
-                  setHospital(value);
                   setPage(1);
                 }}
               />

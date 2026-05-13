@@ -5,18 +5,30 @@ import type { DoctorsResponse } from "@/types/doctor";
 
 export const DOCTORS_REVALIDATE_SECONDS = 60 * 60;
 
+function getDoctorsCacheTags(hospitalId: number) {
+  return ["doctors", `hospital-${hospitalId}-doctors`];
+}
+
+function withDoctorsCacheScope(url: string, hospitalId: number) {
+  const scopedUrl = new URL(url);
+  scopedUrl.searchParams.set("hospitalId", String(hospitalId));
+
+  return scopedUrl.toString();
+}
+
 export async function getDoctors(): Promise<DoctorsResponse> {
-  const doctorsUrl = buildApiUrl("/2/doctors");
+  const hospitalId = 2;
+  const doctorsUrl = buildApiUrl(`/${hospitalId}/doctors`);
 
   if (!doctorsUrl) {
     throw new Error("API base URL is not configured.");
   }
 
-  const response = await fetch(doctorsUrl, {
+  const response = await fetch(withDoctorsCacheScope(doctorsUrl, hospitalId), {
     headers: { Accept: "application/json" },
     next: {
       revalidate: DOCTORS_REVALIDATE_SECONDS,
-      tags: ["doctors"],
+      tags: getDoctorsCacheTags(hospitalId),
     },
   });
 
@@ -42,11 +54,11 @@ export async function getDoctorsByHospitalId(
     throw new Error("API base URL is not configured.");
   }
 
-  const response = await fetch(doctorsUrl, {
+  const response = await fetch(withDoctorsCacheScope(doctorsUrl, hospitalId), {
     headers: { Accept: "application/json" },
     next: {
       revalidate: DOCTORS_REVALIDATE_SECONDS,
-      tags: [`hospital-${hospitalId}-doctors`],
+      tags: getDoctorsCacheTags(hospitalId),
     },
   });
 
